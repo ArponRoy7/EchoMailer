@@ -113,7 +113,7 @@ def send_bulk_emails(subject, body, recipients, template=None, attachments=None)
                         logger.warning(f"Failed to attach {attachment_file.name}: {str(attach_error)}")
 
             # Send the email
-            email.send(fail_silently=False)
+            email.send(fail_silently=True)
 
             # Log success
             EmailLog.objects.create(
