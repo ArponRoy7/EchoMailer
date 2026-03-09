@@ -1,0 +1,58 @@
+{% extends 'emails/base.html' %}
+
+{% block title %}Create Template - Email Automation{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1>Create Email Template</h1>
+        <p>Design a reusable email template with personalization.</p>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-8 mx-auto">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-file-alt me-2"></i>Template Details</h5>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Template Name *</label>
+                        {{ form.name }}
+                        <small class="form-text text-muted">Give your template a descriptive name</small>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Email Subject *</label>
+                        {{ form.subject }}
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Email Body *</label>
+                        {{ form.body }}
+                        <small class="form-text text-muted">Use {{name}}, {{email}}, {{company}} for dynamic content</small>
+                    </div>
+                    
+                    <div class="alert alert-info">
+                        <strong><i class="fas fa-lightbulb me-2"></i>Pro Tip:</strong>
+                        Templates with personalization variables get better engagement rates!
+                    </div>
+                    
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-2"></i>Save Template
+                        </button>
+                        <a href="{% url 'template_list' %}" class="btn btn-outline-secondary">
+                            <i class="fas fa-times me-2"></i>Cancel
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

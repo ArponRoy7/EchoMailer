@@ -1,0 +1,125 @@
+{% extends 'emails/base.html' %}
+
+{% block title %}Email Logs - Email Automation{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1>Email Logs</h1>
+        <p>Track all your sent and failed emails.</p>
+    </div>
+</div>
+
+<!-- Filter Bar -->
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="get" class="row g-3">
+            <div class="col-md-4">
+                <label class="form-label">Filter by Status</label>
+                <select name="status" class="form-select">
+                    <option value="">All Status</option>
+                    <option value="sent" {% if status_filter == 'sent' %}selected{% endif %}>Sent</option>
+                    <option value="failed" {% if status_filter == 'failed' %}selected{% endif %}>Failed</option>
+                    <option value="pending" {% if status_filter == 'pending' %}selected{% endif %}>Pending</option>
+                </select>
+            </div>
+            <div class="col-md-4 d-flex align-items-end">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-filter me-2"></i>Apply Filter
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Logs Table -->
+<div class="table-container">
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Recipient</th>
+                <th>Subject</th>
+                <th>Status</th>
+                <th>Date</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for log in logs %}
+            <tr>
+                <td>
+                    <strong>{{ log.recipient.email }}</strong><br>
+                    <small class="text-muted">{{ log.recipient.company|default:"—" }}</small>
+                </td>
+                <td>{{ log.subject|truncatechars:60 }}</td>
+                <td>
+                    {% if log.status == 'sent' %}
+                        <span class="badge bg-success">
+                            <i class="fas fa-check me-1"></i>Sent
+                        </span>
+                    {% elif log.status == 'failed' %}
+                        <span class="badge bg-danger">
+                            <i class="fas fa-times me-1"></i>Failed
+                        </span>
+                    {% else %}
+                        <span class="badge bg-warning">
+                            <i class="fas fa-clock me-1"></i>Pending
+                        </span>
+                    {% endif %}
+                </td>
+                <td>
+                    {{ log.created_at|date:"M d, Y" }}<br>
+                    <small class="text-muted">{{ log.created_at|date:"H:i A" }}</small>
+                </td>
+                <td>
+                    <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#logModal{{ log.id }}">
+                        <i class="fas fa-eye"></i> View
+                    </button>
+                </td>
+            </tr>
+            
+            <!-- Modal for log details -->
+            <div class="modal fade" id="logModal{{ log.id }}" tabindex="-1">
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Email Details</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="mb-3">
+                                <strong>Recipient:</strong> {{ log.recipient.email }}{% if log.recipient.company %} ({{ log.recipient.company }}){% endif %}
+                            </div>
+                            <div class="mb-3">
+                                <strong>Subject:</strong> {{ log.subject }}
+                            </div>
+                            <div class="mb-3">
+                                <strong>Body:</strong>
+                                <div class="p-3 bg-light rounded mt-2">
+                                    {{ log.body|linebreaks }}
+                                </div>
+                            </div>
+                            {% if log.error_message %}
+                            <div class="alert alert-danger">
+                                <strong>Error:</strong> {{ log.error_message }}
+                            </div>
+                            {% endif %}
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <tr>
+                <td colspan="5" class="text-center text-muted py-5">
+                    <i class="fas fa-inbox fa-3x mb-3 d-block"></i>
+                    No email logs found.
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

@@ -1,0 +1,46 @@
+{% extends 'emails/base.html' %}
+
+{% block title %}Add Recipient - Email Automation{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1>{% if edit_mode %}Edit Recipient{% else %}Add New Recipient{% endif %}</h1>
+        <p>{% if edit_mode %}Update recipient information.{% else %}Add a new contact to your recipient list.{% endif %}</p>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8 mx-auto">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas {% if edit_mode %}fa-user-edit{% else %}fa-user-plus{% endif %} me-2"></i>Recipient Information</h5>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Email Address *</label>
+                        {{ form.email }}
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Company</label>
+                        {{ form.company }}
+                    </div>
+                    
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-2"></i>{% if edit_mode %}Update Recipient{% else %}Save Recipient{% endif %}
+                        </button>
+                        <a href="{% url 'recipient_list' %}" class="btn btn-outline-secondary">
+                            <i class="fas fa-times me-2"></i>Cancel
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

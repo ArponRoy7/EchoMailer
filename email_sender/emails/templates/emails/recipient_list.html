@@ -1,0 +1,133 @@
+{% extends 'emails/base.html' %}
+
+{% block title %}Recipients - Email Automation{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1>Recipients</h1>
+        <p>Manage your email recipients and contacts.</p>
+    </div>
+    <div>
+        <a href="{% url 'import_recipients' %}" class="btn btn-outline-primary me-2">
+            <i class="fas fa-file-upload me-2"></i>Import CSV
+        </a>
+        <a href="{% url 'add_recipient' %}" class="btn btn-primary">
+            <i class="fas fa-plus me-2"></i>Add Recipient
+        </a>
+    </div>
+</div>
+
+<!-- Search Bar -->
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="get" class="row g-3">
+            <div class="col-md-10">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" name="search" class="form-control" 
+                           placeholder="Search by email or company..." 
+                           value="{{ search }}">
+                </div>
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-primary w-100">
+                    <i class="fas fa-search me-2"></i>Search
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Recipients Table -->
+<div class="table-container">
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Email</th>
+                <th>Company</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for recipient in recipients %}
+            <tr>
+                <td>
+                    <div class="d-flex align-items-center">
+                        <div class="avatar-circle me-2">
+                            {{ recipient.email|slice:":1"|upper }}
+                        </div>
+                        <strong>{{ recipient.email }}</strong>
+                    </div>
+                </td>
+                <td>{{ recipient.company|default:"—" }}</td>
+                <td>
+                    <a href="{% url 'edit_recipient' recipient.pk %}" class="btn btn-sm btn-outline-primary me-1" title="Edit">
+                        <i class="fas fa-edit"></i>
+                    </a>
+                    <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteModal{{ recipient.pk }}" title="Delete">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </td>
+            </tr>
+            
+            <!-- Delete Confirmation Modal -->
+            <div class="modal fade" id="deleteModal{{ recipient.pk }}" tabindex="-1" aria-labelledby="deleteModalLabel{{ recipient.pk }}" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="deleteModalLabel{{ recipient.pk }}">Confirm Delete</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            Are you sure you want to delete <strong>{{ recipient.email }}</strong>?
+                            {% if recipient.company %}
+                            <br><small class="text-muted">Company: {{ recipient.company }}</small>
+                            {% endif %}
+                            <br><br>
+                            <div class="alert alert-warning">
+                                <i class="fas fa-exclamation-triangle me-2"></i>This action cannot be undone.
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <form method="post" action="{% url 'delete_recipient' recipient.pk %}" style="display: inline;">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-danger">
+                                    <i class="fas fa-trash me-2"></i>Delete
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <tr>
+                <td colspan="3" class="text-center text-muted py-5">
+                    <i class="fas fa-users fa-3x mb-3 d-block"></i>
+                    <p class="mb-3">No recipients found.</p>
+                    <a href="{% url 'add_recipient' %}" class="btn btn-primary">
+                        <i class="fas fa-plus me-2"></i>Add Your First Recipient
+                    </a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<style>
+.avatar-circle {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 1.125rem;
+}
+</style>
+{% endblock %}

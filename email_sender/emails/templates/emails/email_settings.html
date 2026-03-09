@@ -1,0 +1,253 @@
+{% extends 'emails/base.html' %}
+
+{% block title %}Email Settings - Email Automation System{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h2><i class="fas fa-cog me-2"></i>Email Settings</h2>
+        <p class="text-muted mb-0">Configure email sending behavior and attachments</p>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-sliders-h me-2"></i>Sending Configuration</h5>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+
+                    {% if form.non_field_errors %}
+                    <div class="alert alert-danger">
+                        {{ form.non_field_errors }}
+                    </div>
+                    {% endif %}
+
+                    <!-- Email Delay -->
+                    <div class="mb-4">
+                        <label for="{{ form.email_delay.id_for_label }}" class="form-label">
+                            <i class="fas fa-clock me-2"></i>{{ form.email_delay.label }}
+                        </label>
+                        {{ form.email_delay }}
+                        <small class="form-text text-muted d-block mt-1">
+                            {{ form.email_delay.help_text }}
+                        </small>
+                        {% if form.email_delay.errors %}
+                        <div class="text-danger small mt-1">{{ form.email_delay.errors }}</div>
+                        {% endif %}
+                        <div class="mt-2 p-2 bg-light rounded">
+                            <small>
+                                <strong>Current value:</strong> {{ settings.email_delay }} seconds
+                                {% if settings.email_delay == 0 %}
+                                    <span class="badge bg-warning text-dark ms-2">No Delay</span>
+                                {% endif %}
+                            </small>
+                        </div>
+                    </div>
+
+                    <!-- Batch Settings -->
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <label for="{{ form.batch_size.id_for_label }}" class="form-label">
+                                <i class="fas fa-layer-group me-2"></i>{{ form.batch_size.label }}
+                            </label>
+                            {{ form.batch_size }}
+                            <small class="form-text text-muted d-block mt-1">
+                                {{ form.batch_size.help_text }}
+                            </small>
+                            {% if form.batch_size.errors %}
+                            <div class="text-danger small mt-1">{{ form.batch_size.errors }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            <label for="{{ form.batch_delay.id_for_label }}" class="form-label">
+                                <i class="fas fa-pause me-2"></i>{{ form.batch_delay.label }}
+                            </label>
+                            {{ form.batch_delay }}
+                            <small class="form-text text-muted d-block mt-1">
+                                {{ form.batch_delay.help_text }}
+                            </small>
+                            {% if form.batch_delay.errors %}
+                            <div class="text-danger small mt-1">{{ form.batch_delay.errors }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <hr class="my-4">
+
+                    <!-- Attachment Settings -->
+                    <h6 class="mb-3"><i class="fas fa-paperclip me-2"></i>Attachment Limits</h6>
+
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <label for="{{ form.max_attachments.id_for_label }}" class="form-label">
+                                {{ form.max_attachments.label }}
+                            </label>
+                            {{ form.max_attachments }}
+                            <small class="form-text text-muted d-block mt-1">
+                                {{ form.max_attachments.help_text }}
+                            </small>
+                            {% if form.max_attachments.errors %}
+                            <div class="text-danger small mt-1">{{ form.max_attachments.errors }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            <label for="{{ form.max_attachment_size.id_for_label }}" class="form-label">
+                                {{ form.max_attachment_size.label }}
+                            </label>
+                            {{ form.max_attachment_size }}
+                            <small class="form-text text-muted d-block mt-1">
+                                {{ form.max_attachment_size.help_text }}
+                            </small>
+                            {% if form.max_attachment_size.errors %}
+                            <div class="text-danger small mt-1">{{ form.max_attachment_size.errors }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-2"></i>Save Settings
+                        </button>
+                        <a href="{% url 'dashboard' %}" class="btn btn-secondary">
+                            <i class="fas fa-times me-2"></i>Cancel
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sidebar with Info -->
+    <div class="col-lg-4">
+        <!-- Current Settings Summary -->
+        <div class="card mb-3">
+            <div class="card-header">
+                <h6 class="mb-0"><i class="fas fa-info-circle me-2"></i>Current Settings</h6>
+            </div>
+            <div class="card-body">
+                <ul class="list-unstyled mb-0">
+                    <li class="mb-2">
+                        <strong>Email Delay:</strong><br>
+                        <span class="text-muted">{{ settings.email_delay }}s between emails</span>
+                    </li>
+                    <li class="mb-2">
+                        <strong>Batch Size:</strong><br>
+                        <span class="text-muted">
+                            {% if settings.batch_size > 0 %}
+                                {{ settings.batch_size }} emails per batch
+                            {% else %}
+                                Disabled (no batching)
+                            {% endif %}
+                        </span>
+                    </li>
+                    <li class="mb-2">
+                        <strong>Batch Delay:</strong><br>
+                        <span class="text-muted">{{ settings.batch_delay }}s after each batch</span>
+                    </li>
+                    <li class="mb-2">
+                        <strong>Max Attachments:</strong><br>
+                        <span class="text-muted">{{ settings.max_attachments }} files</span>
+                    </li>
+                    <li class="mb-0">
+                        <strong>Max Size:</strong><br>
+                        <span class="text-muted">{{ settings.max_attachment_size }}MB per file</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Help & Tips -->
+        <div class="card">
+            <div class="card-header">
+                <h6 class="mb-0"><i class="fas fa-lightbulb me-2"></i>Tips & Best Practices</h6>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <h6 class="small"><i class="fas fa-clock text-primary me-2"></i>Email Delay</h6>
+                    <p class="small text-muted mb-0">
+                        Use 1-5 second delays to avoid rate limiting from email providers.
+                        Gmail typically allows ~100-500 emails/day for free accounts.
+                    </p>
+                </div>
+                <hr>
+                <div class="mb-3">
+                    <h6 class="small"><i class="fas fa-layer-group text-success me-2"></i>Batching</h6>
+                    <p class="small text-muted mb-0">
+                        Send emails in batches (e.g., 50 at a time) with longer pauses between batches
+                        to avoid triggering spam filters.
+                    </p>
+                </div>
+                <hr>
+                <div class="mb-0">
+                    <h6 class="small"><i class="fas fa-paperclip text-info me-2"></i>Attachments</h6>
+                    <p class="small text-muted mb-0">
+                        Smaller attachment limits help ensure reliable delivery.
+                        Most providers limit total email size to 25-50MB.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Estimated Time Calculator -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h6 class="mb-0"><i class="fas fa-calculator me-2"></i>Estimated Sending Time</h6>
+            </div>
+            <div class="card-body">
+                <p class="text-muted mb-3">
+                    Based on current settings, here's how long it would take to send different amounts of emails:
+                </p>
+                <div class="row text-center">
+                    <div class="col-md-3">
+                        <div class="p-3 bg-light rounded">
+                            <h3 class="mb-1">10 emails</h3>
+                            <p class="text-muted mb-0">
+                                ~{{ settings.email_delay|floatformat:0|add:"10"|floatformat:0 }}s
+                            </p>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="p-3 bg-light rounded">
+                            <h3 class="mb-1">50 emails</h3>
+                            <p class="text-muted mb-0">
+                                {% widthratio settings.email_delay 1 50 as delay_50 %}
+                                ~{% widthratio delay_50 60 1 %}m {{ delay_50|add:"0"|floatformat:0 }}s
+                            </p>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="p-3 bg-light rounded">
+                            <h3 class="mb-1">100 emails</h3>
+                            <p class="text-muted mb-0">
+                                {% widthratio settings.email_delay 1 100 as delay_100 %}
+                                ~{% widthratio delay_100 60 1 %}m
+                            </p>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="p-3 bg-light rounded">
+                            <h3 class="mb-1">500 emails</h3>
+                            <p class="text-muted mb-0">
+                                {% widthratio settings.email_delay 1 500 as delay_500 %}
+                                ~{% widthratio delay_500 60 1 %}m
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <p class="text-muted small mt-3 mb-0">
+                    <i class="fas fa-info-circle me-1"></i>
+                    These are estimates and don't include batch delays or network latency.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

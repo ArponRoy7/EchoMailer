@@ -1,0 +1,126 @@
+{% extends 'emails/base.html' %}
+
+{% block title %}Compose Email - Email Automation{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1>Compose Email</h1>
+        <p>Create and send personalized emails to your recipients.</p>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-envelope me-2"></i>Email Composition</h5>
+            </div>
+            <div class="card-body">
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+
+                    {% if form.non_field_errors %}
+                    <div class="alert alert-danger">
+                        {{ form.non_field_errors }}
+                    </div>
+                    {% endif %}
+
+                    <div class="mb-3">
+                        <label class="form-label">Use Template (Optional)</label>
+                        {{ form.template }}
+                        <small class="form-text text-muted">Select a template to auto-fill subject and body</small>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Subject *</label>
+                        {{ form.subject }}
+                        {% if form.subject.errors %}
+                        <div class="text-danger small mt-1">{{ form.subject.errors }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Message Body *</label>
+                        {{ form.body }}
+                        <small class="form-text text-muted">Use {{email}}, {{company}} for personalization</small>
+                        {% if form.body.errors %}
+                        <div class="text-danger small mt-1">{{ form.body.errors }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">
+                            <i class="fas fa-paperclip me-2"></i>Attachments (Optional)
+                        </label>
+                        {{ form.attachments }}
+                        <small class="form-text text-muted d-block mt-1">{{ form.attachments.help_text }}</small>
+                        {% if form.attachments.errors %}
+                        <div class="text-danger small mt-1">{{ form.attachments.errors }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Select Recipients *</label>
+                        <div class="recipients-list p-3 border rounded" style="max-height: 300px; overflow-y: auto;">
+                            {{ form.recipients }}
+                        </div>
+                        {% if form.recipients.errors %}
+                        <div class="text-danger small mt-1">{{ form.recipients.errors }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-4">
+                        <div class="form-check">
+                            {{ form.send_immediately }}
+                            <label class="form-check-label">
+                                Send emails immediately
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="fas fa-paper-plane me-2"></i>Send Emails
+                        </button>
+                        <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary btn-lg">
+                            <i class="fas fa-times me-2"></i>Cancel
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-info-circle me-2"></i>Tips</h5>
+            </div>
+            <div class="card-body">
+                <h6 class="mb-3">Personalization Variables:</h6>
+                <div class="mb-3">
+                    <code>{{name}}</code>
+                    <p class="small text-muted mb-2">Recipient's name</p>
+                </div>
+                <div class="mb-3">
+                    <code>{{email}}</code>
+                    <p class="small text-muted mb-2">Recipient's email</p>
+                </div>
+                <div class="mb-3">
+                    <code>{{company}}</code>
+                    <p class="small text-muted mb-2">Recipient's company</p>
+                </div>
+                
+                <hr>
+                
+                <h6 class="mb-3">Example:</h6>
+                <div class="p-3 bg-light rounded">
+                    <p class="small mb-2"><strong>Subject:</strong><br>Hello {{name}}!</p>
+                    <p class="small mb-0"><strong>Body:</strong><br>Hi {{name}} from {{company}},<br>Thank you for your interest...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
