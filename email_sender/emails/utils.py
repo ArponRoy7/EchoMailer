@@ -42,17 +42,19 @@ def get_email_connection():
 def personalize_message(template_text, recipient):
     """Personalize email message with recipient data"""
     template = Template(template_text)
+
     context = Context({
         'email': recipient.email,
         'company': recipient.company,
     })
+
     return template.render(context)
 
 
 def send_bulk_emails(subject, body, recipients, template=None, attachments=None):
     """
     Send personalized emails to multiple recipients.
-    Uses a single SMTP connection for efficiency.
+    Django manages SMTP connections automatically.
     """
 
     results = {
@@ -69,15 +71,8 @@ def send_bulk_emails(subject, body, recipients, template=None, attachments=None)
 
     logger.info(f"Starting bulk email send to {total_recipients} recipients")
 
-    # IMPORTANT: open connection once
-    try:
-        connection.open()
-    except Exception as e:
-        logger.error(f"SMTP connection failed: {str(e)}")
-        results['errors'].append(str(e))
-        return results
-
     for index, recipient in enumerate(recipients_list, start=1):
+
         try:
             personalized_subject = personalize_message(subject, recipient)
             personalized_body = personalize_message(body, recipient)
@@ -87,7 +82,7 @@ def send_bulk_emails(subject, body, recipients, template=None, attachments=None)
                 body=personalized_body,
                 from_email=from_email,
                 to=[recipient.email],
-                connection=connection,
+                connection=connection
             )
 
             attachment_count = 0
@@ -108,6 +103,7 @@ def send_bulk_emails(subject, body, recipients, template=None, attachments=None)
                     except Exception as attach_error:
                         logger.warning(f"Attachment failed: {attach_error}")
 
+            # Send email
             email.send(fail_silently=True)
 
             EmailLog.objects.create(
@@ -124,12 +120,13 @@ def send_bulk_emails(subject, body, recipients, template=None, attachments=None)
 
             logger.info(f"Email sent to {recipient.email} ({index}/{total_recipients})")
 
+            # Delay control
             if index < total_recipients:
 
                 if email_settings.batch_size > 0 and index % email_settings.batch_size == 0:
 
                     if email_settings.batch_delay > 0:
-                        logger.info(f"Batch pause for {email_settings.batch_delay}s")
+                        logger.info(f"Batch delay for {email_settings.batch_delay}s")
                         time.sleep(email_settings.batch_delay)
 
                 elif email_settings.email_delay > 0:
@@ -153,12 +150,6 @@ def send_bulk_emails(subject, body, recipients, template=None, attachments=None)
 
             logger.error(f"Email failed for {recipient.email}: {str(e)}")
 
-    # IMPORTANT: close connection
-    try:
-        connection.close()
-    except Exception as e:
-        logger.warning(f"SMTP close error: {str(e)}")
-
     logger.info(
         f"Bulk email finished. Success: {results['success']}, Failed: {results['failed']}"
     )
@@ -178,7 +169,6 @@ def import_recipients_from_csv(csv_file):
     try:
 
         decoded_file = csv_file.read().decode('utf-8').splitlines()
-
         reader = csv.DictReader(decoded_file)
 
         for row in reader:
